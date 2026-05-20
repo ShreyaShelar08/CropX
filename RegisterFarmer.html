@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register Farmer - Farmer Portal</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Add Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="header">
+    <div class="right-header">
+      <div class="user-info">
+        Welcome, <span id="user-name">User</span>!
+      </div>
+      <button id="logout-btn" class="logout-btn">Logout</button>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <h1 id="form-title" class="h4 text-center">Register Farmer Details</h1>
+    <form id="register-farmer-form" enctype="multipart/form-data">
+      <input type="hidden" id="user-id" name="user_id">
+
+      <div class="row mb-2">
+        <div class="col-md-6">
+          <label for="land_area" class="form-label small">Land Area (acres)</label>
+          <input type="number" id="land_area" name="land_area" step="0.01" min="0" class="form-control form-control-sm" required>
+        </div>
+        <div class="col-md-6">
+          <label for="soil_type" class="form-label small">Soil Type</label>
+          <select id="soil_type" name="soil_type" class="form-select form-select-sm" required>
+            <option value="">Select Soil Type</option>
+            <option value="Sandy">Sandy</option>
+            <option value="Clay">Clay</option>
+            <option value="Silt">Silt</option>
+            <option value="Loam">Loam</option>
+            <option value="Peat">Peat</option>
+            <option value="Chalk">Chalk</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-2">
+        <div class="col-md-6">
+          <label for="soil_color" class="form-label small">Soil Color</label>
+          <select id="soil_color" name="soil_color" class="form-select form-select-sm" required>
+            <option value="">Select Soil Color</option>
+            <option value="Red">Red</option>
+            <option value="Black">Black</option>
+            <option value="Brown">Brown</option>
+            <option value="Yellow">Yellow</option>
+            <option value="White">White</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label for="past_crop_details" class="form-label small">Past Crop Details</label>
+          <textarea id="past_crop_details" name="past_crop_details" rows="2" class="form-control form-control-sm"></textarea>
+        </div>
+      </div>
+
+      <div class="row mb-2">
+        <div class="col-md-6">
+          <label for="region" class="form-label small">Region</label>
+          <input type="text" id="region" name="region" class="form-control form-control-sm" required>
+        </div>
+        <div class="col-md-6">
+          <label for="image" class="form-label small">Upload Image (Optional)</label>
+          <input type="file" id="image" name="image" accept="image/*" class="form-control form-control-sm">
+          <div id="current-image-container" style="display: none; margin-top: 5px;">
+            <p class="small">Current Image:</p>
+            <img id="current-image" src="" alt="Current farmer image" style="max-width: 100%; max-height: 80px;">
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" id="submit-btn" class="btn btn-success btn-sm w-100">Register Farmer</button>
+    </form>
+    <div class="message mt-2 text-center small">
+      <a href="index.html">Back to Home</a>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CropX - Advanced Farming Assistant</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
+    body{background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
+    .container{max-width:900px;width:100%;background:white;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,0.15);overflow:hidden;display:flex;flex-direction:column;height:90vh;}
+    .header{background:linear-gradient(90deg,#2e7d32 0%,#4caf50 100%);color:white;padding:20px;text-align:center;position:relative;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+    .header-content{flex:1;min-width:200px;}
+    .header h1{font-size:24px;margin-bottom:5px;display:flex;align-items:center;justify-content:center;}
+    .header h1 i{margin-right:10px;}
+    .header p{font-size:14px;opacity:0.9;}
+    .header-buttons{display:flex;gap:10px;align-items:center;}
+    .header-btn{background:rgba(255,255,255,0.2);border:none;color:white;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:background 0.3s;}
+    .header-btn:hover{background:rgba(255,255,255,0.3);}
+    .translate-container{background:rgba(255,255,255,0.15);padding:8px 12px;border-radius:20px;}
+    .chat-container{flex:1;display:flex;flex-direction:column;height:100%;}
+    .chat-messages{flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:15px;}
+    .message{max-width:75%;padding:12px 16px;border-radius:18px;line-height:1.4;position:relative;animation:fadeIn 0.3s ease;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    .user-message{align-self:flex-end;background:#e3f2fd;border-bottom-right-radius:5px;color:#0d47a1;}
+    .bot-message{align-self:flex-start;background:#f1f8e9;border-bottom-left-radius:5px;color:#1b5e20;display:flex;align-items:flex-start;gap:10px;}
+    .bot-message .message-text{flex:1;}
+    .speak-btn{cursor:pointer;padding:5px;color:#2e7d32;transition:color 0.3s;font-size:18px;min-width:24px;}
+    .speak-btn:hover{color:#4caf50;}
+    .speak-btn.speaking{color:#ff5722;animation:pulse 1s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+    .chat-input{padding:15px 20px;background:#f5f5f5;display:flex;gap:10px;align-items:center;}
+    .chat-input input{flex:1;padding:12px 15px;border:1px solid #ddd;border-radius:25px;outline:none;font-size:15px;transition:border-color 0.3s;}
+    .chat-input input:focus{border-color:#4caf50;}
+    .chat-input button{background:#4caf50;color:white;border:none;width:50px;height:50px;border-radius:50%;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:background 0.3s;}
+    .chat-input button:hover{background:#2e7d32;}
+    .chat-input button.listening{background:#ff5722;animation:pulse 1s infinite;}
+    .suggestions{display:flex;flex-wrap:wrap;gap:10px;padding:15px;background:#f5f5f5;border-top:1px solid #eee;}
+    .suggestion{background:white;border:1px solid #4caf50;color:#2e7d32;padding:8px 15px;border-radius:18px;font-size:14px;cursor:pointer;transition:all 0.3s;}
+    .suggestion:hover{background:#4caf50;color:white;}
+    @media(max-width:600px){.container{height:95vh;border-radius:15px;}.message{max-width:85%;}.header h1{font-size:20px;}.header{flex-direction:column;}}
+    body.fullscreen{padding:0;}
+    body.fullscreen .container{max-width:100%;width:100%;height:100vh;border-radius:0;}
+    
+    .back-btn{background:rgba(255,255,255,0.2);border:none;color:white;padding:8px 16px;border-radius:20px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background 0.3s;font-size:14px;text-decoration:none;}
+    .back-btn:hover{background:rgba(255,255,255,0.3);}
+    
+    /* Google Translate styling */
+    #google_translate_element{display:inline-block;}
+    .goog-te-gadget{font-family:'Segoe UI',sans-serif !important;}
+    .goog-te-gadget-simple{background-color:rgba(255,255,255,0.2) !important;border:none !important;padding:8px 12px !important;border-radius:20px !important;font-size:13px !important;}
+    .goog-te-gadget-simple .goog-te-menu-value span{color:white !important;}
+    .goog-te-gadget-simple .goog-te-menu-value span:hover{color:#f0f0f0 !important;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back</span>
+      </a>
+      <div class="header-content">
+        <h1><i class="fas fa-seedling"></i> CropX Assistant</h1>
+        <p>AI-powered multilingual farming assistant</p>
+      </div>
+      <div class="header-buttons">
+        <div class="translate-container">
+          <div id="google_translate_element"></div>
+        </div>
+        <button class="header-btn" id="fullscreenBtn" title="Fullscreen"><i class="fas fa-expand"></i></button>
+      </div>
+    </div>
+
+    <div class="chat-container">
+      <div class="chat-messages" id="chatMessages"></div>
+
+      <div class="chat-input">
+        <button id="micButton" title="Speak"><i class="fas fa-microphone"></i></button>
+        <input type="text" id="userInput" placeholder="Ask about farming, crops, yield prediction...">
+        <button id="sendButton"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+
+    <div class="suggestions" id="suggestions">
+      <div class="suggestion" data-msg="What crops grow best in my region?">🌾 Best crops for my region</div>
+      <div class="suggestion" data-msg="How to increase crop yield?">📈 Increase yield tips</div>
+      <div class="suggestion" data-msg="What is the weather forecast?">🌤️ Weather forecast</div>
+      <div class="suggestion" data-msg="Pest control methods">🐛 Pest control</div>
+      <div class="suggestion" data-msg="Soil health improvement">🌱 Soil health</div>
+    </div>
+  </div>
+
+  <script>
+// Google Translate initialization
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement(
+    {
+      pageLanguage: 'en',
+      includedLanguages: 'en,hi,mr,gu,ta,or',
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+    },
+    'google_translate_element'
+  );
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const chatMessages = document.getElementById('chatMessages');
+  const userInput = document.getElementById('userInput');
+  const sendButton = document.getElementById('sendButton');
+  const micButton = document.getElementById('micButton');
+  const fullscreenBtn = document.getElementById('fullscreenBtn');
+  const suggestions = document.querySelectorAll('.suggestion');
+
+  const GEMINI_API_KEY = "AIzaSyAnFMsnepewmmU8CinhhHAwZFopqQdAwck";
+  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+ 
+  let currentUtterance = null;
+  let recognition = null;
+
+  // Language code mapping
+  const langCodeMap = {
+    'en': 'en-US',
+    'hi': 'hi-IN',
+    'mr': 'mr-IN',
+    'gu': 'gu-IN',
+    'ta': 'ta-IN',
+    'or': 'or-IN'
+  };
+
+  // Function to detect current Google Translate language
+  function getCurrentLanguage() {
+    try {
+      // Check for Google Translate iframe
+      const translateFrame = document.querySelector('.goog-te-menu-frame');
+      
+      // Check cookie for language selection
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'googtrans') {
+          // Cookie format: /en/hi (from/to)
+          const langCode = value.split('/')[2];
+          if (langCode && langCodeMap[langCode]) {
+            return langCode;
+          }
+        }
+      }
+      
+      // Check for translate element in URL hash
+      if (window.location.hash.includes('googtrans')) {
+        const match = window.location.hash.match(/googtrans\(.*?\/([a-z]{2})\)/);
+        if (match && match[1]) {
+          return match[1];
+        }
+      }
+      
+      // Default to English
+      return 'en';
+    } catch (e) {
+      console.error('Error detecting language:', e);
+      return 'en';
+    }
+  }
+
+  // Function to get translated text from the page
+  function getTranslatedText(element) {
+    // Get the visible text which Google Translate has already translated
+    return element.textContent || element.innerText;
+  }
+
+  // Fullscreen toggle
+  fullscreenBtn.addEventListener('click', () => {
+    document.body.classList.toggle('fullscreen');
+    const icon = fullscreenBtn.querySelector('i');
+    if (document.body.classList.contains('fullscreen')) {
+      icon.className = 'fas fa-compress';
+    } else {
+      icon.className = 'fas fa-expand';
+    }
+  });
+
+  // Suggestion clicks
+  suggestions.forEach(sug => {
+    sug.addEventListener('click', () => {
+      userInput.value = sug.dataset.msg;
+      handleUserMessage();
+    });
+  });
+
+  function addBotMessage(text, autoSpeak = false) {
+    const div = document.createElement('div');
+    div.className = 'message bot-message';
+    
+    const messageText = document.createElement('div');
+    messageText.className = 'message-text';
+    messageText.textContent = text;
+    // Store original English text
+    messageText.setAttribute('data-original-text', text);
+    
+    const speakBtn = document.createElement('i');
+    speakBtn.className = 'fas fa-volume-up speak-btn';
+    speakBtn.title = 'Speak this message';
+    
+    speakBtn.addEventListener('click', () => {
+      // Wait a moment to ensure translation is complete
+      setTimeout(() => {
+        // Get the current displayed text (which may be translated by Google Translate)
+        let displayedText = getTranslatedText(messageText);
+        const currentLang = getCurrentLanguage();
+        
+        // If the text is still in English and language is not English, wait and try again
+        if (currentLang !== 'en' && displayedText === messageText.getAttribute('data-original-text')) {
+          console.log('Text not yet translated, retrying...');
+          setTimeout(() => {
+            displayedText = getTranslatedText(messageText);
+            speakText(displayedText, currentLang, speakBtn);
+          }, 500);
+        } else {
+          speakText(displayedText, currentLang, speakBtn);
+        }
+      }, 100);
+    });
+    
+    div.appendChild(messageText);
+    div.appendChild(speakBtn);
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Allow Google Translate to process the new text
+    setTimeout(() => {
+      if (window.google && window.google.translate) {
+        try {
+          // Trigger Google Translate to translate new content
+          const event = new Event('DOMNodeInserted');
+          messageText.dispatchEvent(event);
+        } catch (e) {
+          console.log('Translation trigger error:', e);
+        }
+      }
+    }, 100);
+    
+    // Auto-speak if requested
+   /* if (autoSpeak) {
+      setTimeout(() => {
+        const displayedText = getTranslatedText(messageText);
+        const currentLang = getCurrentLanguage();
+        speakText(displayedText, currentLang, speakBtn);
+      }, 500); // Wait for Google Translate to process
+    }*/
+  }
+
+  function addUserMessage(text) {
+    const div = document.createElement('div');
+    div.className = 'message user-message';
+    div.textContent = text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  async function handleUserMessage() {
+    const message = userInput.value.trim();
+    if (!message) return;
+    
+    addUserMessage(message);
+    userInput.value = '';
+    
+    // Add typing indicator
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message bot-message';
+    typingDiv.innerHTML = '<div class="message-text">Typing...</div>';
+    typingDiv.id = 'typing-indicator';
+    chatMessages.appendChild(typingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    try {
+      const res = await fetch(GEMINI_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          contents: [{ 
+            parts: [{ 
+              text: `You are CropX, an advanced farming assistant. Provide helpful advice about crops, farming, yield prediction, and agriculture. User's question: ${message}` 
+            }] 
+          }] 
+        })
+      });
+      const data = await res.json();
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't fetch a response.";
+      
+      // Remove typing indicator
+      document.getElementById('typing-indicator')?.remove();
+      addBotMessage(reply);
+      
+    } catch (e) {
+      document.getElementById('typing-indicator')?.remove();
+      addBotMessage("Error reaching AI. Please check your connection and try again.");
+      console.error('API Error:', e);
+    }
+  }
+
+  // 🎤 Speech-to-Text
+  micButton.addEventListener('click', () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    
+    // Set language based on Google Translate selection
+    const currentLang = getCurrentLanguage();
+    recognition.lang = langCodeMap[currentLang] || 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    // Visual feedback
+    micButton.classList.add('listening');
+    micButton.innerHTML = '<i class="fas fa-stop"></i>';
+
+    recognition.onstart = () => {
+      console.log('Speech recognition started in:', recognition.lang);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      console.log('Recognized:', transcript);
+      userInput.value = transcript;
+      
+      // Reset button
+      micButton.classList.remove('listening');
+      micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+      
+      // Auto-send the message
+      setTimeout(() => handleUserMessage(), 100);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      micButton.classList.remove('listening');
+      micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+      
+      let errorMsg = 'Speech recognition error. ';
+      switch(event.error) {
+        case 'no-speech':
+          errorMsg += 'No speech detected. Please try again.';
+          break;
+        case 'audio-capture':
+          errorMsg += 'Microphone not found. Please check permissions.';
+          break;
+        case 'not-allowed':
+          errorMsg += 'Microphone access denied. Please allow microphone access.';
+          break;
+        default:
+          errorMsg += 'Please try again.';
+      }
+      alert(errorMsg);
+    };
+
+    recognition.onend = () => {
+      micButton.classList.remove('listening');
+      micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+    };
+
+    try {
+      recognition.start();
+    } catch (e) {
+      console.error('Failed to start recognition:', e);
+      micButton.classList.remove('listening');
+      micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+    }
+  });
+
+  // 🔊 Text-to-Speech using Google Translate's selected language
+  function speakText(text, languageCode, buttonElement) {
+    if (!('speechSynthesis' in window)) {
+      alert('Text-to-speech is not supported in your browser.');
+      return;
+    }
+
+    // If already speaking this text, toggle pause/resume
+    if (currentUtterance && speechSynthesis.speaking && currentUtterance.text === text) {
+      if (speechSynthesis.paused) {
+        speechSynthesis.resume();
+        buttonElement.classList.add('speaking');
+      } else {
+        speechSynthesis.pause();
+        buttonElement.classList.remove('speaking');
+      }
+      return;
+    }
+
+    // Stop any ongoing speech
+    speechSynthesis.cancel();
+    
+    // Create new utterance with the translated text
+    currentUtterance = new SpeechSynthesisUtterance(text);
+    
+    // Set language code for speech
+    const speechLangCode = langCodeMap[languageCode] || 'en-US';
+    currentUtterance.lang = speechLangCode;
+    
+    console.log('Speaking in:', speechLangCode, 'Text:', text.substring(0, 50));
+    
+    // Wait for voices to load and select appropriate one
+    function setVoice() {
+      const voices = speechSynthesis.getVoices();
+      
+      // Try to find exact match
+      let matchingVoice = voices.find(voice => 
+        voice.lang === speechLangCode
+      );
+      
+      // If not found, try language code prefix
+      if (!matchingVoice) {
+        matchingVoice = voices.find(voice => 
+          voice.lang.startsWith(languageCode)
+        );
+      }
+      
+      // Prefer Google voices for Indian languages
+      if (!matchingVoice && ['hi', 'mr', 'gu', 'ta', 'or'].includes(languageCode)) {
+        matchingVoice = voices.find(voice => 
+          (voice.name.includes('Google') || voice.name.includes('Indian')) && 
+          voice.lang.includes('IN')
+        );
+      }
+      
+      if (matchingVoice) {
+        currentUtterance.voice = matchingVoice;
+        console.log('Using voice:', matchingVoice.name, matchingVoice.lang);
+      } else {
+        console.log('No matching voice found for', speechLangCode);
+      }
+    }
+    
+    // Set voice
+    setVoice();
+    
+    // Speech settings
+    currentUtterance.rate = 0.85;
+    currentUtterance.pitch = 1;
+    currentUtterance.volume = 1;
+
+    // Visual feedback
+    buttonElement.classList.add('speaking');
+
+    currentUtterance.onend = () => {
+      buttonElement.classList.remove('speaking');
+      currentUtterance = null;
+    };
+
+    currentUtterance.onerror = (event) => {
+      console.error('Speech synthesis error:', event);
+      buttonElement.classList.remove('speaking');
+      currentUtterance = null;
+    };
+
+    // Ensure voices are loaded
+    const voices = speechSynthesis.getVoices();
+    if (voices.length === 0) {
+      speechSynthesis.onvoiceschanged = () => {
+        setVoice();
+        speechSynthesis.speak(currentUtterance);
+      };
+    } else {
+      speechSynthesis.speak(currentUtterance);
+    }
+  }
+
+  // Send button and Enter key
+  sendButton.addEventListener('click', handleUserMessage);
+  userInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleUserMessage();
+  });
+
+  // Initial greeting
+  //addBotMessage("Hi there! I'm CropX, your advanced farming assistant. Tap the speaker icon if you want me to read messages aloud.");
+ });
+</script>
+
+</body>
+</html>

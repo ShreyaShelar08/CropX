@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CropX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <div class="app-container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-seedling"></i>
+                    <span>CropX</span>
+                </div>
+                
+                <div class="nav-toggles">           
+                    <button class="nav-toggle active" data-view="dashboard">
+                        <i class="fas fa-th-large"></i>
+                        <span>Dashboard</span>
+                    </button>
+                   <!-- <button class="nav-toggle" data-view="crops">
+                        <i class="fas fa-leaf"></i>
+                        <span>Crops</span>
+                    </button>
+                    <button class="nav-toggle" data-view="weather">
+                        <i class="fas fa-cloud-sun"></i>
+                        <span>Weather</span> -->
+                    </button>
+                    <button class="nav-toggle" data-view="prices"><a href="prices.html">
+                        <i class="fas fa-chart-line"></i> Prices</a>
+                        
+                    </button>
+                    <!-- <button class="nav-toggle" data-view="protection">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Protection</span> -->
+                    </button>
+                    <a class="nav-toggle" href="chatbot.html" data-view="assistant">
+                        <i class="fas fa-robot"></i> AI Assistant
+                    </a>
+                    <button class="nav-toggle" data-view="prediction"><a href="predict1.html">Prediction</a>
+                        <i class="fas fa-calculator"></i>
+                    </button>
+                     <button class="nav-toggle" data-view="prediction"><a href="model.html">model</a>
+                    </button>
+                    <!-- translate -->
+
+                    <button class="nav-toggle" onclick="toggleTranslate()">
+                        Language
+                      </button>
+                      <div id="google_translate_element" style="display:none;"></div>
+                      
+                     
+                    <button class="nav-toggle" data_view="login"><a href="login.html"> 👤login</a></button>
+                     
+                </div>
+                
+            </div>
+            
+        </header>
+        
+        <main class="main-content">
+            <div class="dashboard-grid">
+                <!-- Weather Card -->
+                <div class="card weather-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-cloud-sun"></i>
+                            Weather Forecast
+                        </h2>
+                        <i class="fas fa-sync-alt" id="refreshWeather"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="weather-current">
+                            <div class="weather-temp">28°C</div>
+                            <div>
+                                <i class="fas fa-sun weather-icon"></i>
+                                <div>Sunny</div>
+                            </div>
+                        </div>
+                        
+                        <div class="weather-details">
+                            <div class="weather-detail">
+                                <i class="fas fa-tint"></i>
+                                <span>Humidity</span>
+                                <strong>65%</strong>
+                            </div>
+                            <div class="weather-detail">
+                                <i class="fas fa-wind"></i>
+                                <span>Wind Speed</span>
+                                <strong>12 km/h</strong>
+                            </div>
+                            <div class="weather-detail">
+                                <i class="fas fa-cloud-rain"></i>
+                                <span>Rainfall</span>
+                                <strong>0mm</strong>
+                            </div>
+                            <div class="weather-detail">
+                                <i class="fas fa-calendar-day"></i>
+                                <span>7-Day Forecast</span>
+                                <strong>View</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Yield Prediction Card -->
+                <div class="card yield-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Yield Prediction
+                        </h2>
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="yield-graph">
+                            <canvas id="yieldChart"></canvas>
+                        </div>
+                        
+                        <div class="yield-stats">
+                            <div class="yield-stat">
+                                <h4>85%</h4>
+                                <span>Predicted Yield</span>
+                            </div>
+                            <div class="yield-stat">
+                                <h4>12%</h4>
+                                <span>Increase from last year</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Price Prediction Card -->
+                <div class="card price-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-dollar-sign"></i>
+                            Market Prices
+                        </h2>
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="price-filter">
+                            <button class="price-filter-btn active" data-period="monthly">Monthly</button>
+                            <button class="price-filter-btn" data-period="quarterly">Quarterly</button>
+                            <button class="price-filter-btn" data-period="yearly">Yearly</button>
+                        </div>
+                        
+                        <div class="price-graph">
+                            <canvas id="priceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Crop Protection Card -->
+                <div class="card protection-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-shield-alt"></i>
+                            Crop Protection
+                        </h2>
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="protection-tabs">
+                            <div class="protection-tab active" data-tab="pest">Pest Detection</div>
+                            <div class="protection-tab" data-tab="disease">Disease Diagnosis</div>
+                            <div class="protection-tab" data-tab="prevention">Prevention Tips</div>
+                        </div>
+                        
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <h3>Upload Image for Analysis</h3>
+                            <p>Click to upload an image of your crop for pest and disease detection</p>
+                        </div>
+                        
+                        <div class="protection-result">
+                            <h4>Last Analysis Result (Sample):</h4>
+                            <div style="display: flex; align-items: center; gap: 20px; margin-top: 16px;">
+                                <div style="width: 150px; height: 150px;">
+                                    <canvas id="healthChart"></canvas>
+                                </div>
+                                <div>
+                                    <p>Your crop is mostly <strong>healthy (75%)</strong> with some signs of infection.</p>
+                                    <button style="margin-top: 12px; background: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                                        View Recommended Actions
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Plant Health Card -->
+                <div class="card health-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-heartbeat"></i>
+                            Plant Health Monitoring
+                        </h2>
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="card-content">
+                        <div style="text-align: center; padding: 20px;">
+                            <i class="fas fa-seedling" style="font-size: 4rem; color: #4CAF50;"></i>
+                            <h3 style="margin: 16px 0;">Overall Health: Good</h3>
+                            <p>Your crops are in good condition. Monitor regularly for any changes.</p>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 24px;">
+                                <div style="background: #E8F5E9; padding: 16px; border-radius: 8px; text-align: center;">
+                                    <i class="fas fa-tint" style="color: #2196F3; font-size: 2rem;"></i>
+                                    <h4>Soil Moisture</h4>
+                                    <p>Optimal</p>
+                                </div>
+                                <div style="background: #E8F5E9; padding: 16px; border-radius: 8px; text-align: center;">
+                                    <i class="fas fa-lightbulb" style="color: #FF9800; font-size: 2rem;"></i>
+                                    <h4>Light Exposure</h4>
+                                    <p>Sufficient</p>
+                                </div>
+                                <div style="background: #E8F5E9; padding: 16px; border-radius: 8px; text-align: center;">
+                                    <i class="fas fa-flask" style="color: #9C27B0; font-size: 2rem;"></i>
+                                    <h4>Nutrient Level</h4>
+                                    <p>Balanced</p>
+                                </div>
+                                <div style="background: #E8F5E9; padding: 16px; border-radius: 8px; text-align: center;">
+                                    <i class="fas fa-bug" style="color: #4CAF50; font-size: 2rem;"></i>
+                                    <h4>Pest Risk</h4>
+                                    <p>Low</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+        
+                <!-- Crop Prediction Card -->
+               
+        </main>
+        
+<!-- 
+        <div class="support-button">
+            <i class="fas fa-comments"></i>
+        </div> -->
+        
+        <div class="notification hidden" id="notification">
+            <i class="fas fa-bell notification-icon"></i>
+            <div id="notificationText">Weather data updated for your region</div>
+        <!-- </div>
+        
+        <footer class="footer">
+            <p></p>
+            <p></p>
+        </footer>
+    </div> -->
+
+    <script>
+        const user = JSON.parse(localStorage.getItem("user"));
+
+            if (!user) {
+                window.location.href = "login.html";
+            }
+        // Initialize charts when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Yield Prediction Chart
+            const yieldCtx = document.getElementById('yieldChart').getContext('2d');
+            const yieldChart = new Chart(yieldCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Yield Prediction',
+                        data: [45, 52, 48, 58, 65, 72, 80, 85, 82, 75, 65, 55],
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Yield (%)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Price Prediction Chart
+            const priceCtx = document.getElementById('priceChart').getContext('2d');
+            const priceChart = new Chart(priceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Market Price',
+                        data: [120, 125, 130, 140, 145, 150, 155, 160, 165, 170, 175, 180],
+                        backgroundColor: '#FF9800'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Price per kg ($)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Crop Health Chart
+            const healthCtx = document.getElementById('healthChart').getContext('2d');
+            const healthChart = new Chart(healthCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Healthy', 'Mild Infection', 'Severe Infection'],
+                    datasets: [{
+                        data: [75, 15, 10],
+                        backgroundColor: ['#4CAF50', '#FF9800', '#F44336']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Simulate real-time updates
+            setInterval(updateWeatherData, 30000);
+            
+            // Initialize the AI assistant
+            initAssistant();
+            
+            // Initialize prediction form
+            initPredictionForm();
+        });
+        
+        function setupEventListeners() {
+            // Navigation toggles
+            document.querySelectorAll('.nav-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    document.querySelectorAll('.nav-toggle').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    // In a real app, this would show different views
+                    showNotification('Switched to ' + this.dataset.view + ' view');
+                });
+            });
+            
+            // Price filter buttons
+            document.querySelectorAll('.price-filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.price-filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    // In a real app, this would filter the price data
+                    showNotification('Showing ' + this.dataset.period + ' prices');
+                });
+            });
+            
+            // Protection tabs
+            document.querySelectorAll('.protection-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.protection-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    // In a real app, this would show different protection content
+                    showNotification('Showing ' + this.dataset.tab + ' information');
+                });
+            });
+            
+            // Refresh weather button
+            document.getElementById('refreshWeather').addEventListener('click', function() {
+                updateWeatherData();
+                showNotification('Weather data refreshed');
+            });
+            
+            // Upload area
+            document.getElementById('uploadArea').addEventListener('click', function() {
+                showNotification('Image upload dialog would open here');
+            });
+            
+            // Support button
+            document.querySelector('.support-button').addEventListener('click', function() {
+                showNotification('Support chat would open here');
+            });
+            
+            // Language selector
+            document.getElementById('languageSelector').addEventListener('change', function() {
+                showNotification('Language changed to ' + this.value);
+            });
+        }
+        
+        function updateWeatherData() {
+            // Simulate updating weather data
+            const tempElement = document.querySelector('.weather-temp');
+            const currentTemp = parseInt(tempElement.textContent);
+            const newTemp = currentTemp + (Math.random() > 0.5 ? 1 : -1);
+            tempElement.textContent = newTemp + '°C';
+            
+            // Randomly change weather condition
+            const conditions = ['Sunny', 'Partly Cloudy', 'Cloudy', 'Rain', 'Thunderstorm'];
+            const icons = ['fa-sun', 'fa-cloud-sun', 'fa-cloud', 'fa-cloud-rain', 'fa-bolt'];
+            const randomIndex = Math.floor(Math.random() * conditions.length);
+            
+            const conditionElement = document.querySelector('.weather-icon').nextElementSibling;
+            conditionElement.textContent = conditions[randomIndex];
+            
+            const iconElement = document.querySelector('.weather-icon');
+            iconElement.className = 'fas ' + icons[randomIndex] + ' weather-icon';
+            
+            // Update humidity and wind
+            const humidity = 60 + Math.floor(Math.random() * 15);
+            const wind = 10 + Math.floor(Math.random() * 10);
+            
+            document.querySelectorAll('.weather-detail strong')[0].textContent = humidity + '%';
+            document.querySelectorAll('.weather-detail strong')[1].textContent = wind + ' km/h';
+        }
+        
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            notificationText.textContent = message;
+            notification.classList.remove('hidden');
+            
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+        }
+        
+function toggleTranslate() {
+  const el = document.getElementById("google_translate_element");
+  el.style.display = el.style.display === "none" ? "block" : "none";
+}  
+
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement(
+        {
+            pageLanguage: 'en',
+            includedLanguages: 'en,hi,mr,gu,ta,or',
+            layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
+        },
+        'google_translate_element'
+    );
+}
+</script>
+  
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CropX - Advanced Farming Assistant</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <style>
+    /* Keep your existing styles unchanged */
+    /* --- Existing CSS copied from your code --- */
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
+    body{background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
+    .container{max-width:900px;width:100%;background:white;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,0.15);overflow:hidden;display:flex;flex-direction:column;height:90vh;}
+    .header{background:linear-gradient(90deg,#2e7d32 0%,#4caf50 100%);color:white;padding:20px;text-align:center;position:relative;display:flex;justify-content:space-between;align-items:center;}
+    .header-content{flex:1;}
+    .header h1{font-size:24px;margin-bottom:5px;display:flex;align-items:center;justify-content:center;}
+    .header h1 i{margin-right:10px;}
+    .header p{font-size:14px;opacity:0.9;}
+    .fullscreen-btn{background:rgba(255,255,255,0.2);border:none;color:white;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:background 0.3s;}
+    .fullscreen-btn:hover{background:rgba(255,255,255,0.3);}
+    .chat-container{flex:1;display:flex;flex-direction:column;height:100%;}
+    .chat-messages{flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:15px;}
+    .message{max-width:75%;padding:12px 16px;border-radius:18px;line-height:1.4;position:relative;animation:fadeIn 0.3s ease;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    .user-message{align-self:flex-end;background:#e3f2fd;border-bottom-right-radius:5px;color:#0d47a1;}
+    .bot-message{align-self:flex-start;background:#f1f8e9;border-bottom-left-radius:5px;color:#1b5e20;}
+    .message-options{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+    .message-option{background:rgba(255,255,255,0.7);padding:5px 10px;border-radius:12px;font-size:12px;cursor:pointer;transition:all 0.2s;}
+    .message-option:hover{background:rgba(255,255,255,0.9);transform:translateY(-2px);}
+    .chat-input{padding:15px 20px;background:#f5f5f5;display:flex;gap:10px;align-items:center;}
+    .chat-input input{flex:1;padding:12px 15px;border:1px solid #ddd;border-radius:25px;outline:none;font-size:15px;transition:border-color 0.3s;}
+    .chat-input input:focus{border-color:#4caf50;}
+    .chat-input button{background:#4caf50;color:white;border:none;width:50px;height:50px;border-radius:50%;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:background 0.3s;}
+    .chat-input button:hover{background:#2e7d32;}
+    .suggestions{display:flex;flex-wrap:wrap;gap:10px;padding:15px;background:#f5f5f5;border-top:1px solid #eee;}
+    .suggestion{background:white;border:1px solid #4caf50;color:#2e7d32;padding:8px 15px;border-radius:18px;font-size:14px;cursor:pointer;transition:all 0.3s;}
+    .suggestion:hover{background:#4caf50;color:white;}
+    .typing-indicator{display:flex;align-items:center;margin-top:5px;}
+    .typing-dot{width:8px;height:8px;background:#4caf50;border-radius:50%;margin:0 3px;animation:typingAnimation 1.4s infinite;}
+    .typing-dot:nth-child(2){animation-delay:0.2s;}
+    .typing-dot:nth-child(3){animation-delay:0.4s;}
+    @keyframes typingAnimation{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-5px);}}
+    .info{padding:15px;text-align:center;background:#fff8e1;color:#5d4037;font-size:14px;border-top:1px solid #ffecb3;}
+    .ai-topics{display:flex;flex-wrap:wrap;gap:10px;padding:15px;background:#e8f5e9;border-top:1px solid #c8e6c9;}
+    .ai-topic{background:white;border:1px solid #81c784;color:#2e7d32;padding:8px 15px;border-radius:18px;font-size:14px;cursor:pointer;transition:all 0.3s;}
+    .ai-topic:hover{background:#4caf50;color:white;}
+    @media(max-width:600px){.container{height:95vh;border-radius:15px;}.message{max-width:85%;}.header h1{font-size:20px;}}
+    body.fullscreen{padding:0;}
+    body.fullscreen .container{max-width:100%;width:100%;height:100vh;border-radius:0;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-content">
+        <h1><i class="fas fa-seedling"></i> CropX Assistant</h1>
+        <p>AI-powered crop yield prediction and optimization</p>
+      </div>
+      <button class="fullscreen-btn" id="fullscreenBtn"><i class="fas fa-expand"></i></button>
+    </div>
+
+    <div class="chat-container">
+      <div class="chat-messages" id="chatMessages"></div>
+
+      <div class="chat-input">
+        <button id="micButton" title="Speak"><i class="fas fa-microphone"></i></button>
+        <input type="text" id="userInput" placeholder="Ask about farming, crops, yield prediction...">
+        <button id="sendButton"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const chatMessages = document.getElementById('chatMessages');
+  const userInput = document.getElementById('userInput');
+  const sendButton = document.getElementById('sendButton');
+  const micButton = document.getElementById('micButton');
+
+  const GEMINI_API_KEY = "AIzaSyCcEVej_mVM0sBOxFjxX5hV31q0JXHjOaI";
+  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+  function addBotMessage(text) {
+    const div = document.createElement('div');
+    div.className = 'message bot-message';
+    const span = document.createElement('span');
+    span.textContent = text;
+    const speakBtn = document.createElement('i');
+    speakBtn.className = 'fas fa-volume-up speak-btn';
+    speakBtn.title = 'Speak this message';
+    speakBtn.addEventListener('click', () => speakText(text));
+    div.appendChild(span);
+    div.appendChild(speakBtn);
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function addUserMessage(text) {
+    const div = document.createElement('div');
+    div.className = 'message user-message';
+    div.textContent = text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  async function handleUserMessage() {
+    const message = userInput.value.trim();
+    if (!message) return;
+    addUserMessage(message);
+    userInput.value = '';
+    try {
+      const res = await fetch(GEMINI_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: message }] }] })
+      });
+      const data = await res.json();
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't fetch a response.";
+      addBotMessage(reply);
+    } catch (e) {
+      addBotMessage("Error reaching Gemini API.");
+    }
+  }
+
+  // 🎤 Speech-to-Text
+  micButton.addEventListener('click', () => {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert('Speech recognition not supported.');
+      return;
+    }
+    const rec = new webkitSpeechRecognition();
+    rec.lang = 'en,hi,or,mr';
+    rec.start();
+    rec.onresult = e => {
+      const transcript = e.results[0][0].transcript;
+      userInput.value = transcript;
+      handleUserMessage();
+    };
+  });
+
+  // 🔊 Text-to-Speech with cancel fix
+  
+let currentUtterance = null;
+let isPaused = false;
+
+function speakText(text) {
+  if (!('speechSynthesis' in window)) {
+    alert('Text-to-speech not supported.');
+    return;
+  }
+
+  // If we're speaking or paused and it's the *same* text → toggle pause/resume
+  if (currentUtterance && (speechSynthesis.speaking || speechSynthesis.paused) && currentUtterance.text === text) {
+    if (isPaused) {
+      speechSynthesis.resume();
+      isPaused = false;
+    } else {
+      speechSynthesis.pause();
+      isPaused = true;
+    }
+    return;
+  }
+
+  // If we’re speaking different text or finished → cancel and start new
+  speechSynthesis.cancel();
+  currentUtterance = new SpeechSynthesisUtterance(text);
+  isPaused = false;
+
+  currentUtterance.onend = () => {
+    currentUtterance = null;
+    isPaused = false;
+  };
+
+  speechSynthesis.speak(currentUtterance);
+}
+
+  sendButton.addEventListener('click', handleUserMessage);
+  userInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleUserMessage(); });
+
+  // Initial greeting
+  addBotMessage("Hi there! I'm CropX, your advanced farming assistant. Tap the speaker icon if you want me to read messages aloud.");
+});
+ // translate
+       function googleTranslateElementInit() {
+    new google.translate.TranslateElement(
+      {pageLanguage: 'en', includedLanguages: 'en,hi,or,mr'},
+      'google_translate_element'
+    );
+  }
+</script>
+
+</body>
+</html>

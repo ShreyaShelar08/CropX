@@ -1,0 +1,952 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Crop Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-light: #8BC34A;
+            --primary-dark: #388E3C;
+            --secondary: #FF9800;
+            --secondary-dark: #F57C00;
+            --accent: #2196F3;
+            --danger: #F44336;
+            --light: #F5F5F5;
+            --dark: #333;
+            --gray: #9E9E9E;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--gray);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        
+        @media (min-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            padding: 20px;
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .card-content {
+            padding: 24px;
+        }
+        
+        /* Form Styles */
+        .prediction-form {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        @media (min-width: 600px) {
+            .prediction-form {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-group label i {
+            color: var(--primary);
+        }
+        
+        .form-group select, .form-group input {
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-group select:focus, .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+        
+        .form-submit {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            margin-top: 16px;
+        }
+        
+        .predict-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .predict-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+        
+        /* Results Styles */
+        .prediction-results {
+            margin-top: 24px;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .yield-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .confidence {
+            padding: 6px 16px;
+            background: var(--primary);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .result-factors {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        
+        @media (min-width: 600px) {
+            .result-factors {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .factor {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .factor-impact {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .impact-high {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+        
+        .impact-medium {
+            background: #fff9c4;
+            color: #f57f17;
+        }
+        
+        .impact-low {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+        
+        /* Chart Styles */
+        .result-chart {
+            height: 300px;
+            margin: 24px 0;
+        }
+        
+        /* Recommendations */
+        .recommendations {
+            background: #E8F5E9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .recommendations h3 {
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .recommendations ul {
+            margin-left: 20px;
+        }
+        
+        .recommendations li {
+            margin-bottom: 8px;
+        }
+        
+        /* AI Processing */
+        .ai-processing {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .ai-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin: 15px 0;
+        }
+        
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        
+        .dot:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+        
+        .dot:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .card-header {
+                padding: 15px;
+            }
+            
+            .card-title {
+                font-size: 1.2rem;
+            }
+            
+            .card-content {
+                padding: 20px;
+            }
+            
+            .predict-btn {
+                padding: 14px 24px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-seedling"></i> AI-Powered Crop Prediction</h1>
+            <p class="subtitle">Get personalized crop recommendations based on your farm's unique conditions</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-robot"></i>
+                    <h2 class="card-title">Crop Prediction Form</h2>
+                </div>
+                <div class="card-content">
+                    <form id="predictionForm" class="prediction-form">
+                        <div class="form-group">
+                            <label for="location"><i class="fas fa-globe"></i> Location</label>
+                            <select id="location" required>
+                                <option value="">Select Region</option>
+                                <option value="north">Northern Region</option>
+                                <option value="south">Southern Region</option>
+                                <option value="east">Eastern Region</option>
+                                <option value="west">Western Region</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="soilType"><i class="fas fa-layer-group"></i> Soil Type</label>
+                            <select id="soilType" required>
+                                <option value="">Select Soil Type</option>
+                                <option value="loamy">Loamy</option>
+                                <option value="sandy">Sandy</option>
+                                <option value="clay">Clay</option>
+                                <option value="silt">Silt</option>
+                                <option value="peat">Peat</option>
+                                <option value="chalky">Chalky</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="soilColor"><i class="fas fa-palette"></i> Soil Color</label>
+                            <select id="soilColor" required>
+                                <option value="">Select Soil Color</option>
+                                <option value="dark">Dark (Rich in organic matter)</option>
+                                <option value="red">Red (Iron-rich)</option>
+                                <option value="yellow">Yellow (Well-drained)</option>
+                                <option value="brown">Brown (Balanced nutrients)</option>
+                                <option value="black">Black (Volcanic/clay-rich)</option>
+                                <option value="white">White (Sandy/saline)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="irrigation"><i class="fas fa-tint"></i> Irrigation Method</label>
+                            <select id="irrigation" required>
+                                <option value="">Select Irrigation Method</option>
+                                <option value="drip">Drip Irrigation</option>
+                                <option value="sprinkler">Sprinkler System</option>
+                                <option value="flood">Flood Irrigation</option>
+                                <option value="rainfed">Rainfed (No irrigation)</option>
+                                <option value="center-pivot">Center Pivot</option>
+                                <option value="subsurface">Subsurface Irrigation</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="previousCrop"><i class="fas fa-history"></i> Previously Taken Crop</label>
+                            <select id="previousCrop" required>
+                                <option value="">Select Previous Crop</option>
+                                <option value="wheat">Wheat</option>
+                                <option value="corn">Corn</option>
+                                <option value="rice">Rice</option>
+                                <option value="soybeans">Soybeans</option>
+                                <option value="cotton">Cotton</option>
+                                <option value="vegetables">Vegetables</option>
+                                <option value="fruits">Fruits</option>
+                                <option value="none">None (First time cultivation)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="area"><i class="fas fa-ruler-combined"></i> Area of Farm (acres)</label>
+                            <input type="number" id="area" min="0" step="0.1" required placeholder="Enter farm area in acres">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="season"><i class="fas fa-calendar-alt"></i> Growing Season</label>
+                            <select id="season" required>
+                                <option value="">Select Season</option>
+                                <option value="spring">Spring</option>
+                                <option value="summer">Summer</option>
+                                <option value="monsoon">Monsoon</option>
+                                <option value="autumn">Autumn</option>
+                                <option value="winter">Winter</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-submit">
+                            <button type="submit" class="predict-btn">
+                                <i class="fas fa-calculator"></i> Predict Optimal Crops
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div id="aiProcessing" class="ai-processing">
+                        <i class="fas fa-brain ai-icon"></i>
+                        <h3>AI Analysis in Progress</h3>
+                        <p>Our AI is analyzing your farm conditions to provide the best crop recommendations...</p>
+                        <div class="loading-dots">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h2 class="card-title">Prediction Results</h2>
+                </div>
+                <div class="card-content">
+                    <div id="predictionResults" class="prediction-results">
+                        <div class="result-header">
+                            <h3>Recommended Crops</h3>
+                            <div class="confidence" id="confidenceValue">92% Accuracy</div>
+                        </div>
+                        
+                        <div class="yield-value" id="yieldValue">Optimal for: Wheat, Corn</div>
+                        
+                        <div class="result-chart">
+                            <canvas id="cropSuitabilityChart"></canvas>
+                        </div>
+                        
+                        <h4>Key Factors Influencing Recommendation</h4>
+                        <div class="result-factors" id="resultFactors">
+                            <!-- Factors will be populated dynamically -->
+                        </div>
+                        
+                        <div class="recommendations">
+                            <h3><i class="fas fa-lightbulb"></i> AI Recommendations</h3>
+                            <ul id="recommendationsList">
+                                <!-- Recommendations will be populated dynamically -->
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div id="noResults" style="text-align: center; padding: 40px 20px; color: var(--gray);">
+                        <i class="fas fa-seedling" style="font-size: 3rem; margin-bottom: 15px; color: #ddd;"></i>
+                        <h3>Submit Your Farm Details</h3>
+                        <p>Fill out the form to get AI-powered crop recommendations tailored to your specific conditions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- <footer>
+            <p>AI-Powered Crop Prediction System &copy; 2023 | Using machine learning to optimize agricultural outcomes</p>
+        </footer>
+    </div> -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const predictionForm = document.getElementById('predictionForm');
+            const predictionResults = document.getElementById('predictionResults');
+            const noResults = document.getElementById('noResults');
+            const aiProcessing = document.getElementById('aiProcessing');
+            const yieldValue = document.getElementById('yieldValue');
+            const confidenceValue = document.getElementById('confidenceValue');
+            const resultFactors = document.getElementById('resultFactors');
+            const recommendationsList = document.getElementById('recommendationsList');
+            
+            // Initialize chart
+            let cropChart = null;
+            
+            // Form submission
+            predictionForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const location = document.getElementById('location').value;
+                const soilType = document.getElementById('soilType').value;
+                const soilColor = document.getElementById('soilColor').value;
+                const irrigation = document.getElementById('irrigation').value;
+                const previousCrop = document.getElementById('previousCrop').value;
+                const area = parseFloat(document.getElementById('area').value);
+                const season = document.getElementById('season').value;
+                
+                // Validate form
+                if (!location || !soilType || !soilColor || !irrigation || !previousCrop || !area || !season) {
+                    alert('Please fill all fields');
+                    return;
+                }
+                
+                // Show AI processing
+                aiProcessing.style.display = 'block';
+                noResults.style.display = 'none';
+                predictionResults.style.display = 'none';
+                
+                // Simulate AI processing time
+                setTimeout(() => {
+                    // Hide AI processing
+                    aiProcessing.style.display = 'none';
+                    
+                    // Generate prediction based on inputs
+                    const prediction = generatePrediction(location, soilType, soilColor, irrigation, previousCrop, area, season);
+                    
+                    // Update results
+                    yieldValue.textContent = `Optimal for: ${prediction.crops.join(', ')}`;
+                    confidenceValue.textContent = `${prediction.confidence}% Accuracy`;
+                    
+                    // Update factors
+                    updateFactors(prediction.factors);
+                    
+                    // Update recommendations
+                    updateRecommendations(prediction.recommendations);
+                    
+                    // Update chart
+                    updateChart(prediction.cropData);
+                    
+                    // Show results
+                    predictionResults.style.display = 'block';
+                }, 2500);
+            });
+            
+            // Generate prediction based on inputs with randomization
+            function generatePrediction(location, soilType, soilColor, irrigation, previousCrop, area, season) {
+                // Base crops for different conditions
+                const crops = {
+                    wheat: { suitability: 0, yield: 0 },
+                    corn: { suitability: 0, yield: 0 },
+                    rice: { suitability: 0, yield: 0 },
+                    soybeans: { suitability: 0, yield: 0 },
+                    cotton: { suitability: 0, yield: 0 },
+                    vegetables: { suitability: 0, yield: 0 },
+                    fruits: { suitability: 0, yield: 0 },
+                    barley: { suitability: 0, yield: 0 },
+                    oats: { suitability: 0, yield: 0 },
+                    millet: { suitability: 0, yield: 0 }
+                };
+                
+                // Random seed based on current time and inputs
+                const randomSeed = Date.now() + location.length + soilType.length + soilColor.length + irrigation.length + previousCrop.length;
+                const random = (min, max) => {
+                    const x = Math.sin(randomSeed) * 10000;
+                    return Math.floor((x - Math.floor(x)) * (max - min + 1)) + min;
+                };
+                
+                // Adjust based on location with randomization
+                const locationRandom = random(1, 10);
+                if (location === 'north') {
+                    crops.wheat.suitability += 0.8 + (locationRandom * 0.02);
+                    crops.corn.suitability += 0.6 + (locationRandom * 0.02);
+                    crops.barley.suitability += 0.7 + (locationRandom * 0.02);
+                } else if (location === 'south') {
+                    crops.rice.suitability += 0.9 + (locationRandom * 0.02);
+                    crops.cotton.suitability += 0.7 + (locationRandom * 0.02);
+                    crops.millet.suitability += 0.6 + (locationRandom * 0.02);
+                } else if (location === 'east') {
+                    crops.rice.suitability += 0.8 + (locationRandom * 0.02);
+                    crops.vegetables.suitability += 0.7 + (locationRandom * 0.02);
+                    crops.fruits.suitability += 0.6 + (locationRandom * 0.02);
+                } else if (location === 'west') {
+                    crops.cotton.suitability += 0.8 + (locationRandom * 0.02);
+                    crops.fruits.suitability += 0.7 + (locationRandom * 0.02);
+                    crops.wheat.suitability += 0.6 + (locationRandom * 0.02);
+                }
+                
+                // Adjust based on soil type with randomization
+                const soilTypeRandom = random(1, 10);
+                if (soilType === 'loamy') {
+                    crops.wheat.suitability += 0.9 + (soilTypeRandom * 0.02);
+                    crops.corn.suitability += 0.9 + (soilTypeRandom * 0.02);
+                    crops.vegetables.suitability += 0.8 + (soilTypeRandom * 0.02);
+                } else if (soilType === 'sandy') {
+                    crops.cotton.suitability += 0.7 + (soilTypeRandom * 0.02);
+                    crops.millet.suitability += 0.8 + (soilTypeRandom * 0.02);
+                    crops.fruits.suitability += 0.6 + (soilTypeRandom * 0.02);
+                } else if (soilType === 'clay') {
+                    crops.rice.suitability += 0.8 + (soilTypeRandom * 0.02);
+                    crops.wheat.suitability += 0.7 + (soilTypeRandom * 0.02);
+                    crops.barley.suitability += 0.6 + (soilTypeRandom * 0.02);
+                } else if (soilType === 'silt') {
+                    crops.vegetables.suitability += 0.8 + (soilTypeRandom * 0.02);
+                    crops.fruits.suitability += 0.7 + (soilTypeRandom * 0.02);
+                    crops.soybeans.suitability += 0.6 + (soilTypeRandom * 0.02);
+                } else if (soilType === 'peat') {
+                    crops.rice.suitability += 0.7 + (soilTypeRandom * 0.02);
+                    crops.vegetables.suitability += 0.6 + (soilTypeRandom * 0.02);
+                    crops.fruits.suitability += 0.5 + (soilTypeRandom * 0.02);
+                } else if (soilType === 'chalky') {
+                    crops.fruits.suitability += 0.7 + (soilTypeRandom * 0.02);
+                    crops.barley.suitability += 0.6 + (soilTypeRandom * 0.02);
+                    crops.oats.suitability += 0.5 + (soilTypeRandom * 0.02);
+                }
+                
+                // Adjust based on soil color with randomization
+                const soilColorRandom = random(1, 10);
+                if (soilColor === 'dark') {
+                    crops.wheat.suitability += 0.8 + (soilColorRandom * 0.02);
+                    crops.corn.suitability += 0.9 + (soilColorRandom * 0.02);
+                    crops.vegetables.suitability += 0.8 + (soilColorRandom * 0.02);
+                } else if (soilColor === 'red') {
+                    crops.rice.suitability += 0.7 + (soilColorRandom * 0.02);
+                    crops.cotton.suitability += 0.6 + (soilColorRandom * 0.02);
+                    crops.fruits.suitability += 0.7 + (soilColorRandom * 0.02);
+                } else if (soilColor === 'yellow') {
+                    crops.soybeans.suitability += 0.8 + (soilColorRandom * 0.02);
+                    crops.corn.suitability += 0.7 + (soilColorRandom * 0.02);
+                    crops.millet.suitability += 0.6 + (soilColorRandom * 0.02);
+                } else if (soilColor === 'brown') {
+                    crops.wheat.suitability += 0.7 + (soilColorRandom * 0.02);
+                    crops.vegetables.suitability += 0.8 + (soilColorRandom * 0.02);
+                    crops.fruits.suitability += 0.7 + (soilColorRandom * 0.02);
+                } else if (soilColor === 'black') {
+                    crops.rice.suitability += 0.9 + (soilColorRandom * 0.02);
+                    crops.cotton.suitability += 0.7 + (soilColorRandom * 0.02);
+                    crops.wheat.suitability += 0.6 + (soilColorRandom * 0.02);
+                } else if (soilColor === 'white') {
+                    crops.cotton.suitability += 0.8 + (soilColorRandom * 0.02);
+                    crops.millet.suitability += 0.7 + (soilColorRandom * 0.02);
+                    crops.barley.suitability += 0.6 + (soilColorRandom * 0.02);
+                }
+                
+                // Adjust based on irrigation method with randomization
+                const irrigationRandom = random(1, 10);
+                if (irrigation === 'drip') {
+                    crops.vegetables.suitability += 0.9 + (irrigationRandom * 0.02);
+                    crops.fruits.suitability += 0.8 + (irrigationRandom * 0.02);
+                    crops.cotton.suitability += 0.7 + (irrigationRandom * 0.02);
+                } else if (irrigation === 'sprinkler') {
+                    crops.wheat.suitability += 0.8 + (irrigationRandom * 0.02);
+                    crops.corn.suitability += 0.7 + (irrigationRandom * 0.02);
+                    crops.barley.suitability += 0.6 + (irrigationRandom * 0.02);
+                } else if (irrigation === 'flood') {
+                    crops.rice.suitability += 0.9 + (irrigationRandom * 0.02);
+                    crops.soybeans.suitability += 0.7 + (irrigationRandom * 0.02);
+                    crops.cotton.suitability += 0.6 + (irrigationRandom * 0.02);
+                } else if (irrigation === 'rainfed') {
+                    crops.millet.suitability += 0.8 + (irrigationRandom * 0.02);
+                    crops.wheat.suitability += 0.7 + (irrigationRandom * 0.02);
+                    crops.oats.suitability += 0.6 + (irrigationRandom * 0.02);
+                } else if (irrigation === 'center-pivot') {
+                    crops.corn.suitability += 0.9 + (irrigationRandom * 0.02);
+                    crops.soybeans.suitability += 0.8 + (irrigationRandom * 0.02);
+                    crops.wheat.suitability += 0.7 + (irrigationRandom * 0.02);
+                } else if (irrigation === 'subsurface') {
+                    crops.vegetables.suitability += 0.8 + (irrigationRandom * 0.02);
+                    crops.fruits.suitability += 0.7 + (irrigationRandom * 0.02);
+                    crops.cotton.suitability += 0.6 + (irrigationRandom * 0.02);
+                }
+                
+                // Adjust based on previous crop (crop rotation benefits) with randomization
+                const cropRandom = random(1, 10);
+                if (previousCrop === 'wheat') {
+                    crops.soybeans.suitability += 0.8 + (cropRandom * 0.02);
+                    crops.vegetables.suitability += 0.6 + (cropRandom * 0.02);
+                    crops.corn.suitability += 0.5 + (cropRandom * 0.02);
+                    crops.wheat.suitability -= 0.5;
+                } else if (previousCrop === 'corn') {
+                    crops.soybeans.suitability += 0.7 + (cropRandom * 0.02);
+                    crops.wheat.suitability += 0.6 + (cropRandom * 0.02);
+                    crops.vegetables.suitability += 0.5 + (cropRandom * 0.02);
+                    crops.corn.suitability -= 0.5;
+                } else if (previousCrop === 'rice') {
+                    crops.soybeans.suitability += 0.7 + (cropRandom * 0.02);
+                    crops.vegetables.suitability += 0.6 + (cropRandom * 0.02);
+                    crops.wheat.suitability += 0.5 + (cropRandom * 0.02);
+                    crops.rice.suitability -= 0.5;
+                } else if (previousCrop === 'soybeans') {
+                    crops.wheat.suitability += 0.8 + (cropRandom * 0.02);
+                    crops.corn.suitability += 0.7 + (cropRandom * 0.02);
+                    crops.cotton.suitability += 0.5 + (cropRandom * 0.02);
+                    crops.soybeans.suitability -= 0.5;
+                } else if (previousCrop === 'none') {
+                    for (const crop in crops) {
+                        crops[crop].suitability += 0.2 + (cropRandom * 0.01);
+                    }
+                }
+                
+                // Adjust based on area with randomization
+                const areaRandom = random(1, 10);
+                if (area > 10) {
+                    crops.wheat.suitability += 0.6 + (areaRandom * 0.02);
+                    crops.corn.suitability += 0.7 + (areaRandom * 0.02);
+                    crops.cotton.suitability += 0.5 + (areaRandom * 0.02);
+                } else {
+                    crops.vegetables.suitability += 0.7 + (areaRandom * 0.02);
+                    crops.fruits.suitability += 0.6 + (areaRandom * 0.02);
+                    crops.soybeans.suitability += 0.5 + (areaRandom * 0.02);
+                }
+                
+                // Adjust based on season with randomization
+                const seasonRandom = random(1, 10);
+                if (season === 'spring') {
+                    crops.wheat.suitability += 0.7 + (seasonRandom * 0.02);
+                    crops.vegetables.suitability += 0.8 + (seasonRandom * 0.02);
+                    crops.barley.suitability += 0.6 + (seasonRandom * 0.02);
+                } else if (season === 'summer') {
+                    crops.corn.suitability += 0.9 + (seasonRandom * 0.02);
+                    crops.rice.suitability += 0.8 + (seasonRandom * 0.02);
+                    crops.cotton.suitability += 0.7 + (seasonRandom * 0.02);
+                } else if (season === 'monsoon') {
+                    crops.rice.suitability += 0.9 + (seasonRandom * 0.02);
+                    crops.millet.suitability += 0.7 + (seasonRandom * 0.02);
+                    crops.soybeans.suitability += 0.6 + (seasonRandom * 0.02);
+                } else if (season === 'autumn') {
+                    crops.vegetables.suitability += 0.7 + (seasonRandom * 0.02);
+                    crops.fruits.suitability += 0.6 + (seasonRandom * 0.02);
+                    crops.wheat.suitability += 0.5 + (seasonRandom * 0.02);
+                } else if (season === 'winter') {
+                    crops.wheat.suitability += 0.8 + (seasonRandom * 0.02);
+                    crops.barley.suitability += 0.7 + (seasonRandom * 0.02);
+                    crops.oats.suitability += 0.6 + (seasonRandom * 0.02);
+                }
+                
+                // Ensure no negative suitability values
+                for (const crop in crops) {
+                    crops[crop].suitability = Math.max(0, crops[crop].suitability);
+                }
+                
+                // Calculate yield estimates based on suitability with randomization
+                for (const crop in crops) {
+                    const yieldRandom = random(70, 95);
+                    crops[crop].yield = Math.round(crops[crop].suitability * yieldRandom);
+                    crops[crop].suitability = Math.min(1, crops[crop].suitability);
+                }
+                
+                // Get top 3 crops
+                const cropArray = Object.entries(crops)
+                    .map(([name, data]) => ({ name, ...data }))
+                    .sort((a, b) => b.suitability - a.suitability)
+                    .slice(0, 3);
+                
+                // Generate factors with random impacts
+                const factors = [
+                    { name: 'Soil Type', impact: random(1, 3) },
+                    { name: 'Soil Color', impact: random(1, 3) },
+                    { name: 'Irrigation Method', impact: random(1, 3) },
+                    { name: 'Location', impact: random(1, 3) },
+                    { name: 'Previous Crop', impact: random(1, 3) },
+                    { name: 'Season', impact: random(1, 3) },
+                    { name: 'Farm Area', impact: random(1, 3) }
+                ].sort((a, b) => b.impact - a.impact);
+                
+                // Generate recommendations
+                const recommendations = [
+                    'Test soil nutrients before planting',
+                    'Consider crop rotation to maintain soil health',
+                    'Prepare for irrigation during dry spells',
+                    'Monitor for common pests in your region',
+                    'Consider intercropping with legumes to improve soil nitrogen',
+                    'Apply appropriate fertilizers based on soil test results',
+                    'Implement water conservation techniques',
+                    'Use organic mulch to retain soil moisture',
+                    'Adjust irrigation schedule based on crop water requirements',
+                    'Consider soil amendments based on soil type and color'
+                ].sort(() => 0.5 - Math.random()).slice(0, 5);
+                
+                // Calculate confidence with some randomness
+                const confidence = random(85, 98);
+                
+                return {
+                    crops: cropArray.map(crop => {
+                        return crop.name.charAt(0).toUpperCase() + crop.name.slice(1);
+                    }),
+                    cropData: cropArray,
+                    factors: factors,
+                    recommendations: recommendations,
+                    confidence: confidence
+                };
+            }
+            
+            // Update factors display
+            function updateFactors(factors) {
+                resultFactors.innerHTML = '';
+                
+                factors.forEach(factor => {
+                    const factorDiv = document.createElement('div');
+                    factorDiv.className = 'factor';
+                    
+                    const factorName = document.createElement('span');
+                    factorName.textContent = factor.name;
+                    
+                    const factorImpact = document.createElement('span');
+                    factorImpact.className = 'factor-impact';
+                    
+                    if (factor.impact === 3) {
+                        factorImpact.classList.add('impact-high');
+                        factorImpact.textContent = 'High Impact';
+                    } else if (factor.impact === 2) {
+                        factorImpact.classList.add('impact-medium');
+                        factorImpact.textContent = 'Medium Impact';
+                    } else {
+                        factorImpact.classList.add('impact-low');
+                        factorImpact.textContent = 'Low Impact';
+                    }
+                    
+                    factorDiv.appendChild(factorName);
+                    factorDiv.appendChild(factorImpact);
+                    resultFactors.appendChild(factorDiv);
+                });
+            }
+            
+            // Update recommendations display
+            function updateRecommendations(recommendations) {
+                recommendationsList.innerHTML = '';
+                
+                recommendations.forEach(rec => {
+                    const li = document.createElement('li');
+                    li.textContent = rec;
+                    recommendationsList.appendChild(li);
+                });
+            }
+            
+            // Update the chart with prediction results
+            function updateChart(cropData) {
+                const ctx = document.getElementById('cropSuitabilityChart').getContext('2d');
+                
+                // Destroy previous chart if it exists
+                if (cropChart) {
+                    cropChart.destroy();
+                }
+                
+                // Create new chart
+                cropChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: cropData.map(crop => crop.name.charAt(0).toUpperCase() + crop.name.slice(1)),
+                        datasets: [
+                            {
+                                label: 'Suitability Score',
+                                data: cropData.map(crop => crop.suitability * 100),
+                                backgroundColor: '#4CAF50',
+                                borderColor: '#388E3C',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Expected Yield (%)',
+                                data: cropData.map(crop => crop.yield),
+                                backgroundColor: '#FF9800',
+                                borderColor: '#F57C00',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Score (%)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Crop Suitability & Expected Yield'
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Initialize with no results message
+            noResults.style.display = 'block';
+        });
+    function googleTranslateElementInit() {
+    new google.translate.TranslateElement(
+      {pageLanguage: 'en', includedLanguages: 'en,hi,or,mr,gu,ta,or'},
+      'google_translate_element'
+    );
+  }
+    </script>
+</body>
+</html>
